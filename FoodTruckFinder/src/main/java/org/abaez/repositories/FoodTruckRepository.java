@@ -18,4 +18,6 @@ public interface FoodTruckRepository extends ListCrudRepository<FoodTruck, Integ
 
     @Query("SELECT DISTINCT ft.foodItems FROM FoodTruck ft")
     List<String> findDistinctFoodItems();
+
+    List<FoodTruck> findAllByLatitudeNotAndStatusEquals(Double invalid, String status);
 }

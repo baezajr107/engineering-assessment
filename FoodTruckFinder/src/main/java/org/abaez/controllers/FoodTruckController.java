@@ -30,4 +30,11 @@ public class FoodTruckController {
         return foodTruckService.getFoodTruckFilters();
     }
 
+    @GetMapping("/food-trucks/closest")
+    public FoodTruck getClosestFoodTruckByAddress(@RequestParam String streetAddress,
+                                                           @RequestParam String city,
+                                                           @RequestParam String state,
+                                                           @RequestParam String zipcode){
+        return foodTruckService.getClosestFoodTruckByAddress(streetAddress,city,state,zipcode);
+    }
 }

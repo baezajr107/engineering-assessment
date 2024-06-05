@@ -3,6 +3,7 @@ package org.abaez.services;
 import org.abaez.entities.FoodTruck;
 import org.abaez.repositories.FoodTruckQuerySpecifications;
 import org.abaez.repositories.FoodTruckRepository;
+import org.abaez.utils.VectorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,9 @@ import java.util.*;
 public class FoodTruckService {
     @Autowired
     private FoodTruckRepository foodTruckRepository;
+
+    @Autowired
+    GeocodingService geocodingService;
 
     public List<FoodTruck> findFoodTrucks(String applicants, String status, String foodItems){
         //given the dynamic nature of this query, we build a dynamic query specification instead relying on
@@ -58,5 +62,13 @@ public class FoodTruckService {
 //        filterSets.put("foodItems",foodItemsSorted);
 
         return filterSets;
+    }
+
+    public FoodTruck getClosestFoodTruckByAddress(String streetAddress, String city, String state, String zipcode){
+        Map<String,Double> addressCoordinates = geocodingService.convertAddressToCoords(streetAddress,city,state,zipcode);
+        //get all food trucks minus the ones that don't have a valid location or aren't active
+        List<FoodTruck> foodTrucks = foodTruckRepository.findAllByLatitudeNotAndStatusEquals(0.0,"APPROVED");
+        return VectorUtils.findClosestToCoordinates(addressCoordinates,foodTrucks);
+
     }
 }
