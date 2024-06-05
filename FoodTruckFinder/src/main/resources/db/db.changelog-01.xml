@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1" author="Austin Baez">
+        <createTable tableName="food_trucks">
+            <column name="location_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="applicant" type="varchar(1024)"/>
+            <column name="facility_type" type="varchar(1024)"/>
+            <column name="cnn" type="int"/>
+            <column name="location_description" type="varchar(1024)"/>
+            <column name="address" type="varchar(1024)"/>
+            <column name="blocklot" type="varchar(1024)"/>
+            <column name="block" type="varchar(1024)"/>
+            <column name="lot" type="varchar(1024)"/>
+            <column name="permit" type="varchar(1024)"/>
+            <column name="status" type="varchar(1024)"/>
+            <column name="food_items" type="varchar(1024)"/>
+            <column name="x" type="float"/>
+            <column name="y" type="float"/>
+            <column name="latitude" type="float"/>
+            <column name="longitude" type="float"/>
+            <column name="schedule" type="varchar(1024)"/>
+            <column name="dayshours" type="varchar(1024)"/>
+            <column name="approved" type="datetime"/>
+            <column name="received" type="varchar(1024)"/>
+            <column name="prior_permit" type="boolean"/>
+            <column name="expiration_date" type="datetime"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
