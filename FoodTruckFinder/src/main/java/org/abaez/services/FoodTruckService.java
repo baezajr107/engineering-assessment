@@ -16,7 +16,7 @@ public class FoodTruckService {
     private FoodTruckRepository foodTruckRepository;
 
     @Autowired
-    GeocodingService geocodingService;
+    private GeocodingService geocodingService;
 
     public List<FoodTruck> findFoodTrucks(String applicants, String status, String foodItems){
         //given the dynamic nature of this query, we build a dynamic query specification instead relying on
