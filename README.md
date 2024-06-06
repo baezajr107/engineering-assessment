@@ -45,6 +45,9 @@ The order of operations should be as follows:
   * Once that's up and running, run the python script to populate the data.
   * After the data is populated, you can navigate to http://localhost:8080/swagger-ui/index.html to get the swagger UI and start playing with the API's.
 
+#### I added the API key back in. I would keep it removed because having keys in the repo is an issue, but I want to make sure it runs as expected and reduce the work necessary to get it presentable. I'll just burn it when we're done. 
+
+
 Here's some relevant commands to run from the root directory once you've cloned the repo. 
 cd FoodTruckFinder
 docker-compose up --build
