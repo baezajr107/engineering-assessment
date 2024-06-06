@@ -19,7 +19,7 @@ services:
       context: .
     container_name: backend
     environment:
-      GOOGLE_API_KEY: KEY
+      GOOGLE_API_KEY: AIzaSyDBQvKKCxvIQah6Umvc1cfTWzUh__-HGrY
     restart: on-failure
     depends_on:
       db:
