@@ -4,6 +4,8 @@ import org.abaez.entities.FoodTruck;
 import org.abaez.repositories.FoodTruckQuerySpecifications;
 import org.abaez.repositories.FoodTruckRepository;
 import org.abaez.utils.VectorUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,8 @@ public class FoodTruckService {
 
     @Autowired
     private GeocodingService geocodingService;
+
+    Logger logger = LoggerFactory.getLogger(FoodTruckService.class);
 
     public List<FoodTruck> findFoodTrucks(String applicants, String status, String foodItems){
         //given the dynamic nature of this query, we build a dynamic query specification instead relying on
@@ -40,6 +44,11 @@ public class FoodTruckService {
         filterSets.put("applicant",foodTruckRepository.findDistinctApplicant());
         filterSets.put("status",foodTruckRepository.findDistinctStatus());
         filterSets.put("foodItems",foodTruckRepository.findDistinctFoodItems());
+        logger.debug("found %d distinct applicants, %d distinct statuses, and %d distinct food items"
+                .formatted(
+                filterSets.get("applicant").size(),
+                filterSets.get("status").size(),
+                filterSets.get("foodItems").size()));
 /*
         I wanted this to basically be a way to filter based on any single type of item.
         If these weren't split, then the filters would end up being basically unique strings that only map
@@ -68,6 +77,7 @@ public class FoodTruckService {
         Map<String,Double> addressCoordinates = geocodingService.convertAddressToCoords(streetAddress,city,state,zipcode);
         //get all food trucks minus the ones that don't have a valid location or aren't active
         List<FoodTruck> foodTrucks = foodTruckRepository.findAllByLatitudeNotAndStatusEquals(0.0,"APPROVED");
+        logger.debug("found %d valid food trucks.".formatted(foodTrucks.size()));
         return VectorUtils.findClosestToCoordinates(addressCoordinates,foodTrucks);
 
     }
