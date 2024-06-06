@@ -1,36 +1,55 @@
-# Engineering Challenge
+# Engineering Solution
+Hello, I made a thing. I'm calling it "The Food Truck Finder+". The intent was to make something that was as close to a marketable product and enterprise grade solution as possible. It's built from the ground up to exist in a real world environment handling useful data and operations. With that said, here are the features:
 
-We strive to be a practical and pragmatic team. That extends to the way that we work with you to understand if this team is a great fit for you. We want you to come away with a great understanding of the kind of things that we actually do day to day and what it is like to work in our teams.
+### Containerization
+In a world where scalibility, portability, and compatibility are of the utmost importance, containerizing runtimes is a must. The application is built to run in docker. I've defined a docker compose file because it runs using a mysql instance for persistence of the data and the containers need to coordinate. With that, it's basically plug and play. This application is ready to be deployed and scaled to a production environment at a moment's notice given an orchestration layer like Kubernetes.
 
-We don't believe that whiteboard coding with someone watching over your shoulder accurately reflects our day to day. Instead we'd like to be able to discuss code that you have already written when we meet.
+### Swagger/OpenAPI
+Of all the tools I utilize for productivity, Swagger is probably my favorite. No more scrounging for outdated postman collections or navigating a labyrinth of confluence pages. The specs for the API now come straight from the source. When I've done frontend work, having a live and interactable interface with which to reference and test is an absolute force multiplier. I have it at the basic level of auto generation detail, but the API's can be documented as verbosely as is necessary.
 
-This can be a project of your own or a substantial pull request on an open source project, but we recognize that most people have done private or proprietary work and this engineering challenge is for you.
+### Liquibase
+Liquibase was made by the people who got tired of having to manage folders full of sql scripts hoping that the different databases stayed in sync. Liquibase gives the application control over the database schema so that anywhere the application is run, its database automatically has the most up to date version. It also helps getting newer developers spun up faster since they need to put less work into standing up a local environment. 
 
-We realize that taking on this assignment represents a time commitment for you, and we do not take that lightly. Throughout the recruitment process we will be respectful of your time and commit to working quickly and efficiently. This will be the only technical assessment you'll be asked to do. The brief following conversations will be based on this assessment and your prior experiences.
+### Live data ingestion
+I defined a python script that can access the data API and pull it into a locally persisted database. My vision was for this to be run in a cloud functon with a schedule on it to make sure we had updated data. There are a few reasons for doing it the way I did:
+  * Having the ingestion be separate from the query code decouples the two so they can be configured and operated in whichever way is optimal with minimal interference between them.
+  * It was written in python due to the turnaround time in development. If the API spec changes and production stops getting fed data, the ability to fight the fire can be catered directly to the urgency. From updating the code in the repository and running it through the CI/CD for less urgent occasions, to modifying it directly in the function in the case of a P0 outage, it allows for that level of agility. Getting things back up and running is incredibly important when minutes are money.
+  * Pulling live data vs static allows us to avoid getting stale results. And persisting the data instead of reaching out to the API every time avoids rate limiting(reducing costs) and improves performance from colocation of the data and the application accessing it. 
 
-## Challenge Guidelines
+### Base data filtering
+I've defined a few fields with which we can filter the dataset. The filter parameters in the API take a comma separates list of strings. With the convenience features of spring, adding new filter fields is incredibly simple. I've also added an API that pulls a live set of valid filter values for the sake of convenience. The fields are as follows:
+  * applicant: This is the name of the food truck. Pretty straight forward.
+  * status: This is the current state of the food truck. It's useful primarily in determining which ones still exist.
+  * foodItems: This is the list of things the food trucks sell. As you'll see in the code, this field is all over the place in terms of quality and consistency, so it's difficult to leverage as a way to get trucks based on specific items.
 
-* This is meant to be an assignment that you spend approximately two to three hours of focused coding. Do not feel that you need to spend extra time to make a good impression. Smaller amounts of high quality code will let us have a much better conversation than large amounts of low quality code.
+### Find Closest Food Truck
+This is an API that will take a normal address("1234 mulberry lane Fairy Tale Land, FT 54321") and leverage Google's Geocoding API to get coordinates for it and determine which food truck is closest to that address. Keep in mind, this isn't just find the closest food truck to your house. It's the closest food truck to any address(in san francisco). Want some after work noodles? Maybe some post workout street tacos? It's right there. The filtering is a bit bare on it. I wanted to add a filter for type of food but the food types data just didn't make that easy enough to do within the timeframe. 
 
-* Think of this like an open source project. Create a repo on Github, use git for source control, and use a Readme file to document what you built for the newcomer to your project.
+As a minor add, I've included the jupyter notebooks I used to prototype the API functionality. The thought process is important for these types of things, so I think it's useful insight.
 
-* We build systems engineered to run in production. Given this, please organize, design, test, deploy, and document your solution as if you were going to put it into production. We completely understand this might mean you can't do much in the time budget. Prioritize production-readiness over features.
+## Things I would put into "The Food Truck Finder+ Pro"
 
-* Think out loud in your documentation. Write our tradeoffs, the thoughts behind your choices, or things you would do or do differently if you were able to spend more time on the project or do it a second time.
+### Terraform
+This was next on my list, but it was a bit too much of a time investment to be within scope for this POC. I maintain my own GCP sandbox environment. So I had planned to actually deploy it as an alternative to running locally. That being said, Infrastructure as Code is just the standard operating procedure at this point. I've used terraform on a good number of projects and the clarity it provides while being able to scale to N environments is a game changer. 
 
-* We have a variety of languages and frameworks that we use, but we don't expect you to know them ahead of time. For this assignment you can make whatever choices that let you express the best solution to the problem given your knowledge and favorite tools without any restriction. Please make sure to document how to get started with your solution in terms of setup so that we'd be able to run it.
+### CI/CD
+The next part of my plan was to implement a CI/CD pipeline using either cloud build or github actions to make it so I don't have to manually throw the runtimes into the environment after every commit. 
 
-* Once this is functioning and documented to your liking, either send us a link to your public repo or compress the project directory, give the file a pithy name which includes your own name, and send the file to us.
+### Find Closest Food Truck Hotstop
+Building off the find closest food truck API, what if you could find the closest hotspot. What I mean  by that is to imagine a heatmap. Using some fun math tricks, we can define the set of "peaks" in the location grouping of the food trucks, and use the same logic as the find closest food truck to get you to the closest hotspot. Then you can be surrounded by all the food you want!
 
-## The Challenge
+## How to run it
+It's built in Docker, so you primarily just need that. I also didn't containerize the python script, so you'll need to install python and the relevant dependencies manually.
+The order of operations should be as follows:
+  * Run the Docker Compose file to spin up the application and database. The application will handle instantiating the schema within the database. You're going to need my Google API key, which I'll pass on through the recruiter. Throw it into the docker compose file where it says KEY
+  * Once that's up and running, run the python script to populate the data.
+  * After the data is populated, you can navigate to http://localhost:8080/swagger-ui/index.html to get the swagger UI and start playing with the API's.
 
-As the song says, "you've got to play the hand you're dealt", and in this case your hand is to implement something to help us manage our food truck habit.
+Here's some relevant commands to run from the root directory once you've cloned the repo. 
+cd FoodTruckFinder
+docker-compose up --build
 
-Our team loves to eat. They are also a team that loves variety, so they also like to discover new places to eat.
-
-In fact, we have a particular affection for food trucks. One of the great things about Food Trucks in San Francisco is that the city releases a list of them as open data.
-
-Your assignment is to make it possible for our teams to do something interesting with this food trucks data.
-
-This is a freeform assignment. You can write a web API that returns a set of food trucks. You can write a web frontend that visualizes the nearby food trucks for a given place. You can create a CLI that lets us get the names of all the taco trucks in the city. You can create system that spits out a container with a placeholder webpage featuring the name of each food truck to help their marketing efforts. You're not limited by these ideas at all, but hopefully those are enough help spark your own creativity.
-San Francisco's food truck open dataset is [located here](https://data.sfgov.org/Economy-and-Community/Mobile-Food-Facility-Permit/rqzj-sfat/data) and there is an endpoint with a [CSV dump of the latest data here](https://data.sfgov.org/api/views/rqzj-sfat/rows.csv). We've also included a copy of the data in this repo as well.
+cd DataIngestor
+pip3 install sqlalchemy
+pip3 install pandas
+python3 FoodTruckIngestion.py
